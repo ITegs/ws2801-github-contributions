@@ -1,5 +1,6 @@
 #include <FastLED.h>
 #include <WiFi.h>
+#include <HTTPClient.h>
 #include "data.h" //only for privacy reasons
 
 #define NUM_LEDS 161
@@ -12,12 +13,12 @@ CRGB leds[NUM_LEDS];
 const char* ssid = ssid_private;            //"YOUR SSID HERE"
 const char* password = password_private;    //"YOUR PASSWORD HERE"
 
+const char host[] = "api.github.com";
 
 void initWiFi() {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     Serial.println("Connecting to WiFi ..");
-    Serial.println(WiFi.macAddress());
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print('.');
         delay(1000);
@@ -48,4 +49,19 @@ void setup()
 	initWiFi();
 }
 
-void loop() {}
+void loop() {
+    if (WiFi.status() == WL_CONNECTED){
+        HTTPClient http;
+        http.begin("https://api.github.com/users/ITegs");
+        int httpCode = http.GET();
+        if (httpCode > 0) {
+            String payload = http.getString();
+            Serial.println(httpCode);
+            Serial.println(payload);
+        }
+        else {
+            Serial.println("ERROR!!!");
+        }
+    }
+    delay(30000);
+}
