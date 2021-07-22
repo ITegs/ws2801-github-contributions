@@ -13,7 +13,7 @@ CRGB leds[NUM_LEDS];
 const char* ssid = ssid_private;            //"YOUR SSID HERE"
 const char* password = password_private;    //"YOUR PASSWORD HERE"
 
-const char host[] = "api.github.com";
+char* query = " { \"query\": \"query { viewer { login }}\" } ";
 
 void initWiFi() {
     WiFi.mode(WIFI_STA);
@@ -52,15 +52,16 @@ void setup()
 void loop() {
     if (WiFi.status() == WL_CONNECTED){
         HTTPClient http;
-        http.begin("https://api.github.com/users/ITegs");
-        int httpCode = http.GET();
+        http.begin("https://api.github.com/graphql");
+        http.addHeader("Authorization", githubToken);       //githubToken = "bearer YOUR_TOKEN"
+        int httpCode = http.POST(query);
         if (httpCode > 0) {
             String payload = http.getString();
             Serial.println(httpCode);
             Serial.println(payload);
         }
         else {
-            Serial.println("ERROR!!!");
+            Serial.println("ERROR!");
         }
     }
     delay(30000);
