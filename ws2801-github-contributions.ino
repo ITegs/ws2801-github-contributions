@@ -13,7 +13,7 @@ CRGB leds[NUM_LEDS];
 const char* ssid = ssid_private;            //"YOUR SSID HERE"
 const char* password = password_private;    //"YOUR PASSWORD HERE"
 
-char* query = " { \"query\": \"query { viewer { login }}\" } ";
+char* query = " { \"query\": \"query { viewer { contributionsCollection { contributionCalendar { weeks { contributionDays { date color } } } } } }\" } ";
 
 void initWiFi() {
     WiFi.mode(WIFI_STA);
