@@ -1,6 +1,7 @@
 #include <FastLED.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <Arduino_JSON.h>
 #include "data.h" //only for privacy reasons
 
 #define NUM_LEDS 161
@@ -15,7 +16,7 @@ const char* password = password_private;    //"YOUR PASSWORD HERE"
 
 char* query = " { \"query\": \"query { viewer { contributionsCollection { contributionCalendar { weeks { contributionDays { date color } } } } } }\" } ";
 
-void initWiFi() {
+void initWiFi(){
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     Serial.println("Connecting to WiFi ..");
@@ -41,15 +42,27 @@ void wifiConected(){
 	}
 }
 
-void setup()
-{
+void parseJSON(String JSON_Data){
+    JSONVar decoded_data = JSON.parse(JSON_Data);
+    if (JSON.typeof(decoded_data) == "undefined") {
+        Serial.println("Parsing input failed!");
+        return;
+    }
+
+    JSONVar keys = decoded_data.keys();
+
+    Serial.println("JSON Sample:");
+    Serial.println();
+}
+
+void setup(){
 	Serial.begin(57600);
 	FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, GBR>(leds, NUM_LEDS);
 	FastLED.setBrightness(50);
 	initWiFi();
 }
 
-void loop() {
+void loop(){
     if (WiFi.status() == WL_CONNECTED){
         HTTPClient http;
         http.begin("https://api.github.com/graphql");
@@ -59,10 +72,11 @@ void loop() {
             String payload = http.getString();
             Serial.println(httpCode);
             Serial.println(payload);
+            parseJSON(payload);
         }
         else {
             Serial.println("ERROR!");
         }
     }
-    delay(30000);
+    delay(300000);
 }
