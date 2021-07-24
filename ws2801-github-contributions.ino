@@ -14,7 +14,7 @@ CRGB leds[NUM_LEDS];
 const char* ssid = ssid_private;            //"YOUR SSID HERE"
 const char* password = password_private;    //"YOUR PASSWORD HERE"
 
-char* query = " { \"query\": \"query { viewer { contributionsCollection { contributionCalendar { weeks { contributionDays { date color } } } } } }\" } ";
+char* query = " { \"query\": \"query { viewer { contributionsCollection { contributionCalendar { weeks { contributionDays { color } } } } } }\" } ";
 
 void initWiFi(){
     WiFi.mode(WIFI_STA);
@@ -49,10 +49,35 @@ void parseJSON(String JSON_Data){
         return;
     }
 
-    JSONVar keys = decoded_data.keys();
+    int i = 0;
+    for(int week = 30; week <= 52; week++){
+        for(int day = 0; day < 7; day++){
+            JSONVar color = decoded_data["data"]["viewer"]["contributionsCollection"]["contributionCalendar"]["weeks"][week]["contributionDays"][day]["color"];
+            //Serial.println(color);
+            setColor(i, color);
+            i++;
+        }
+    }
+}
 
-    Serial.println("JSON Sample:");
-    Serial.println();
+void setColor(int i, JSONVar color){
+    String hexColor = JSON.stringify(color);
+    hexColor.remove(0, 2);
+    hexColor.remove(6, 1);
+
+    long number = (long) strtol( &hexColor[1], NULL, 16);
+    int r = number >> 16;
+    int g = number >> 8 & 0xFF;
+    int b = number & 0xFF;
+
+    leds[i].setRGB(r, g , b);
+    if(hexColor == "ebedf0"){       //no contributions
+		leds[i] = CRGB::Black;
+    }
+    else{
+        leds[i].setRGB(r, g , b);
+    }
+	FastLED.show();
 }
 
 void setup(){
@@ -71,7 +96,7 @@ void loop(){
         if (httpCode > 0) {
             String payload = http.getString();
             Serial.println(httpCode);
-            Serial.println(payload);
+            //Serial.println(payload);
             parseJSON(payload);
         }
         else {
