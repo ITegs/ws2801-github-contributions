@@ -53,7 +53,6 @@ void parseJSON(String JSON_Data){
     for(int week = 30; week <= 52; week++){
         for(int day = 0; day < 7; day++){
             JSONVar color = decoded_data["data"]["viewer"]["contributionsCollection"]["contributionCalendar"]["weeks"][week]["contributionDays"][day]["color"];
-            //Serial.println(color);
             setColor(i, color);
             i++;
         }
@@ -72,10 +71,10 @@ void setColor(int i, JSONVar color){
 
     leds[i].setRGB(r, g , b);
     if(hexColor == "ebedf0"){       //no contributions
-		leds[i] = CRGB::Black;
+		leds[i - 1] = CRGB::Black;
     }
     else{
-        leds[i].setRGB(r, g , b);
+        leds[i - 1].setRGB(r, g , b);
     }
 	FastLED.show();
 }
@@ -96,7 +95,6 @@ void loop(){
         if (httpCode > 0) {
             String payload = http.getString();
             Serial.println(httpCode);
-            //Serial.println(payload);
             parseJSON(payload);
         }
         else {
